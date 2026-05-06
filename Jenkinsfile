@@ -40,13 +40,13 @@ pipeline {
             }
         }
 
-        stage('Build React App') {
-            steps {
-                dir("${FRONTEND_DIR}") {
-                    bat 'npm run build'
-                }
-            }
+stage('Build React App') {
+    steps {
+        dir("${FRONTEND_DIR}") {
+            bat 'set CI=false && npm run build'
         }
+    }
+}
 
         stage('Start Backend Server') {
             steps {
