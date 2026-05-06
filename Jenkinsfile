@@ -2,18 +2,19 @@ pipeline {
     agent any
 
     environment {
-        // Force Jenkins to use system Node (v20.12.2)
-        PATH = "C:\\Program Files\\nodejs;${env.PATH}"
+        NODEJS_HOME = "C:\\Program Files\\nodejs"
+        PATH = "${NODEJS_HOME};${env.PATH}"
         FRONTEND_DIR = "client"
         BACKEND_DIR = "server"
+        CI = "false"
+        PORT = "3000"
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                url: 'https://github.com/soniakalonia/to-do-app.git'
+                git branch: 'main', url: 'https://github.com/soniakalonia/to-do-app.git'
             }
         }
 
@@ -40,18 +41,18 @@ pipeline {
             }
         }
 
-stage('Build React App') {
-    steps {
-        dir("${FRONTEND_DIR}") {
-            bat 'set CI=false && npm run build'
+        stage('Build React App') {
+            steps {
+                dir("${FRONTEND_DIR}") {
+                    bat 'npm run build'
+                }
+            }
         }
-    }
-}
 
         stage('Start Backend Server') {
             steps {
                 dir("${BACKEND_DIR}") {
-                    bat 'start /B npm start'
+                    bat 'start cmd /k npm start'
                 }
             }
         }
@@ -59,7 +60,8 @@ stage('Build React App') {
         stage('Serve React Build on Port 3000') {
             steps {
                 dir("${FRONTEND_DIR}") {
-                    bat 'npx serve -s build -l 3000'
+                    bat 'npm install -g serve'
+                    bat 'start cmd /k serve -s build -l 3000'
                 }
             }
         }
@@ -67,12 +69,10 @@ stage('Build React App') {
 
     post {
         success {
-            echo 'APP DEPLOYED SUCCESSFULLY'
-            echo 'Frontend: http://localhost:3000'
-            echo 'Backend:  http://localhost:5000'
+            echo '🎉 PIPELINE SUCCESS — APP RUNNING ON http://localhost:3000'
         }
         failure {
-            echo 'PIPELINE FAILED'
+            echo '❌ PIPELINE FAILED'
         }
     }
 }
